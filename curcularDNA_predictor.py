@@ -1,6 +1,5 @@
 import streamlit as st
 from Bio import SeqIO, Seq
-from Bio.SeqUtils import six_frame_translations
 from difflib import SequenceMatcher
 import io
 import re
@@ -14,6 +13,7 @@ def check_circularity(seq, min_overlap=100, identity_threshold=0.9):
     return ratio >= identity_threshold, ratio
 
 def detect_repeats(seq, min_repeat_size=10):
+    seq = seq.upper()
     repeats = []
     for size in range(min_repeat_size, min_repeat_size+10):
         for i in range(len(seq)-size):
@@ -23,11 +23,19 @@ def detect_repeats(seq, min_repeat_size=10):
     return repeats
 
 def find_ORFs(seq, min_orf=100):
-    seq_obj = Seq.Seq(seq)
+    # Clean up sequence: keep only A, T, G, C
+    seq_clean = re.sub(r'[^ATGC]', '', seq.upper())
+    seq_obj = Seq.Seq(seq_clean)
     orfs = []
     for strand, nuc in [(+1, seq_obj), (-1, seq_obj.reverse_complement())]:
         for frame in range(3):
-            trans = str(nuc[frame:].translate(to_stop=False))
+            nuc_frame = nuc[frame:]
+            codon_length = len(nuc_frame) - (len(nuc_frame) % 3)
+            nuc_trimmed = nuc_frame[:codon_length]
+            try:
+                trans = str(nuc_trimmed.translate(to_stop=False))
+            except Exception:
+                continue  # Skip frames with translation errors
             for m in re.finditer('M.*?\*', trans):
                 orf_len = (m.end() - m.start())*3
                 if orf_len >= min_orf:
@@ -37,7 +45,7 @@ def find_ORFs(seq, min_orf=100):
     return orfs
 
 def annotate_elements(seq):
-    # Dummy annotation: TATA box, polyA signal, etc.
+    seq = seq.upper()
     annotations = []
     if "TATAAA" in seq:
         annotations.append({'element': 'TATA box', 'pos': seq.find('TATAAA')})
@@ -55,15 +63,16 @@ def plot_circular_map(seq, repeats, orfs, annotations):
     # Draw repeats
     for r in repeats:
         theta = [2 * 3.1416 * r['start'] / length, 2 * 3.1416 * r['end'] / length]
-        ax.plot(theta, [1.2, 1.2], color='red', linewidth=4, label='Repeat')
+        ax.plot(theta, [1.2, 1.2], color='red', linewidth=4)
     # Draw ORFs
     for o in orfs:
         theta = [2 * 3.1416 * o['start'] / length, 2 * 3.1416 * o['end'] / length]
-        ax.plot(theta, [0.8, 0.8], color='green', linewidth=4, label='ORF')
+        ax.plot(theta, [0.8, 0.8], color='green', linewidth=4)
     # Annotate elements
     for a in annotations:
         theta = 2 * 3.1416 * a['pos'] / length
-        ax.plot([theta], [1], marker='o', color='blue', label=a['element'])
+        ax.plot([theta], [1], marker='o', color='blue')
+        ax.text(theta, 1.05, a['element'], color='blue', fontsize=8, ha='center')
     ax.set_title('Circular Genome Map', va='bottom')
     return fig
 
@@ -85,7 +94,14 @@ def generate_pdf_report(results, seq, repeats, orfs, annotations):
 st.set_page_config(page_title="Circular DNA Scanner", layout="wide")
 st.title("Circular DNA Scanner")
 
-tabs = st.tabs(["Home", "Upload", "Result", "Visualization", "Documentation", "PDF Report"])
+tabs = st.tabs([
+    "Home",
+    "Upload",
+    "Result",
+    "Visualization",
+    "Documentation",
+    "PDF Report"
+])
 min_overlap_default = 100
 identity_threshold_default = 0.9
 
