@@ -6,78 +6,66 @@ import re
 import matplotlib.pyplot as plt
 from fpdf import FPDF
 
-# --- PNG IMAGE ICONS FOR RELIABILITY ---
-DNA_ICON = "https://static.thenounproject.com/png/1201536-200.png"
-CIRCULAR_ICON = "https://cdn.pixabay.com/photo/2013/07/12/13/53/dna-147571_1280.png"
-PLASMID_ICON = "https://cdn-icons-png.flaticon.com/512/6167/6167011.png"
-
-# --- MODERN CSS BACKGROUND & CARDS ---
+# --- Clean, Light, Readable Background & Cards ---
 st.markdown("""
     <style>
     .stApp {
-        background: linear-gradient(135deg, #141e30 0%, #243b55 100%) !important;
+        background: #f8fafc !important;
         min-height: 100vh;
     }
     .main > div {
-        background: rgba(245,247,250,0.89) !important;
-        border-radius: 20px !important;
+        background: #fff !important;
+        border-radius: 18px !important;
         margin-top: 18px !important;
-        padding: 14px 22px 8px 22px !important;
-        box-shadow: 0 12px 36px 0 rgba(35,60,130,0.13) !important;
+        padding: 12px 22px 8px 22px !important;
+        box-shadow: 0 8px 24px 0 rgba(80,80,140,0.07) !important;
     }
-    .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4 {
-        color: #193466 !important;
+    .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4, .stMarkdown h5, .stMarkdown h6 {
+        color: #12305a !important;
+        background: none !important;
+        margin-top: 1.5em;
+        margin-bottom: 0.5em;
+    }
+    .stMarkdown h2, .stMarkdown h3 {
+        border-left: 5px solid #4361ee44;
+        padding-left: 9px;
     }
     .stButton>button, .stDownloadButton>button {
-        background: linear-gradient(90deg, #2b5876 10%, #4e4376 90%)!important;
-        color: #f7fdff !important;
+        background: linear-gradient(90deg, #4361ee 10%, #b8c0ff 90%)!important;
+        color: #fff !important;
         border-radius: 8px;
         font-weight: 700;
-        font-size: 1.09em;
+        font-size: 1.04em;
         border: none;
     }
     .stButton>button:hover, .stDownloadButton>button:hover {
-        background: linear-gradient(90deg, #4e4376, #2b5876)!important;
+        background: linear-gradient(90deg, #b8c0ff 20%, #4361ee 80%)!important;
         color: #fff;
         border: none;
         transform: translateY(-2px) scale(1.03);
     }
     .stTabs [data-baseweb="tab"] {
-        color: #404d7a !important;
+        color: #26406d !important;
         font-weight: 500;
-        background: #f1f1fc99;
-        border-radius: 10px 10px 0 0;
-        margin-right: 6px;
+        background: #f7f9ff;
+        border-radius: 12px 12px 0 0;
+        margin-right: 8px;
         margin-bottom: 0px;
-        padding: 7px 20px 6px 20px !important;
+        padding: 8px 24px 8px 24px !important;
     }
     .stTabs [aria-selected="true"] {
-        background: linear-gradient(90deg, #a8edea99 0%, #fed6e399 80%)!important;
-        color: #14203f !important;
-        border-bottom: 4px solid #5271ff;
+        background: #e0e8ff !important;
+        color: #12305a !important;
+        border-bottom: 4px solid #4361ee;
         font-weight: 700;
-        box-shadow: 0 8px 22px -16px #888aad55;
+        box-shadow: 0 8px 22px -20px #888aad22;
     }
-    /* Card images */
-    img, .element-container img {
-        background-color: #f0f5ff;
-        border-radius: 14px;
-        border: 2px solid #9f86c032;
-        box-shadow: 0 2px 8px 1px #2a366f0c;
-        padding: 7px;
-        margin-bottom: 8px;
-        max-width: 100%;
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-    }
-    /* Sidebar nicer fallback coloring */
     section[data-testid="stSidebar"] div[class^="css-"] {
-        background: linear-gradient(180deg, #233047 0%, #383b65 100%)!important;
-        color: #fff !important;
-        border-radius: 22px !important;
-        margin: 8px;
-        padding: 8px 10px 16px 10px;
+        background: #e8effd !important;
+        color: #17325d !important;
+        border-radius: 20px !important;
+        margin: 10px;
+        padding: 10px 14px 18px 14px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -161,9 +149,8 @@ def generate_pdf_report(results, seq, repeats, orfs, annotations):
     pdf.multi_cell(0, 10, txt=f"First 300 bases: {seq[:300]}...")
     return pdf.output(dest='S').encode('latin-1')
 
-# -- SIDEBAR WITH LOGO AND ABOUT --
+# -- SIDEBAR WITH ABOUT --
 with st.sidebar:
-    st.image(DNA_ICON, width=180, use_column_width=False)
     st.markdown("### 🧬 Circular DNA Scanner")
     st.info(
         "Detects circularity, repeats, ORFs, and elements in DNA sequences. "
@@ -172,15 +159,12 @@ with st.sidebar:
     st.markdown("---")
     st.write("**Author:** bhagya220")
     st.write("Version: 1.0")
-    st.image(PLASMID_ICON, width=100, caption="Plasmid example", use_column_width=False)
 
-# -- MAIN PAGE TITLE WITH IMAGE --
+# -- MAIN PAGE TITLE --
 st.set_page_config(page_title="Circular DNA Scanner", layout="wide")
 col1, col2 = st.columns([7, 1])
 with col1:
     st.title("🧬 Circular DNA Scanner")
-with col2:
-    st.image(CIRCULAR_ICON, width=90, use_column_width=False)
 
 tabs = st.tabs([
     "Home",
@@ -208,13 +192,9 @@ with tabs[0]:
         - **Documentation:** How the tool works.
         - **PDF Report:** Export results as PDF.
         """)
-    with c2:
-        st.image(DNA_ICON, width=150, caption="DNA double helix", use_column_width=True)
-        st.image(PLASMID_ICON, width=90, caption="Circular DNA", use_column_width=True)
 
 with tabs[1]:
     st.header("Upload or Paste Sequence")
-    st.image(CIRCULAR_ICON, width=70, use_column_width=False)
     min_overlap = st.slider("Minimum Overlap (bases)", min_value=20, max_value=500, value=min_overlap_default, step=10)
     identity_threshold = st.slider("Identity Threshold", min_value=0.5, max_value=1.0, value=identity_threshold_default, step=0.01)
     upload_option = st.radio("Choose input method:", ["Upload FASTA file", "Paste Sequence"])
@@ -289,14 +269,11 @@ with tabs[2]:
                 st.write(f"**ORFs Detected:** {len(result['ORFs'])}")
                 st.write(f"**Annotations:** {', '.join([a['element'] for a in result['Annotations']]) or 'None'}")
                 st.code(result["Sequence"][:300] + "...", language="text")
-            with c2:
-                st.image(PLASMID_ICON, width=80, use_column_width=True)
     else:
         st.info("No results to show. Please process sequences in the Upload tab.")
 
 with tabs[3]:
     st.header("Visualization")
-    st.image(PLASMID_ICON, width=70, use_column_width=False)
     results = st.session_state.get('results', [])
     if results:
         for result in results:
@@ -308,7 +285,6 @@ with tabs[3]:
 
 with tabs[4]:
     st.header("Documentation")
-    st.image(DNA_ICON, width=90, use_column_width=False)
     st.markdown("""
     ## About Circular DNA Scanner
     This tool predicts whether DNA sequences are circular by comparing the first and last N bases for similarity.
@@ -338,10 +314,9 @@ with tabs[5]:
     st.header("PDF Report")
     results = st.session_state.get('results', [])
     if results:
-        result = results[0]
+        result = results[0]  # Only first result for demo; can loop for batch
         pdf_bytes = generate_pdf_report(result, result["Sequence"], result["Repeats"], result["ORFs"], result["Annotations"])
         st.download_button("Download PDF Report", pdf_bytes, file_name="CircularDNA_Report.pdf")
-        st.image("https://cdn-icons-png.flaticon.com/512/337/337946.png", width=48, caption="Download your PDF!", use_column_width=False)
     else:
         st.info("No results to export. Please process sequences in the Upload tab.")
 
