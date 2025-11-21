@@ -6,86 +6,78 @@ import re
 import matplotlib.pyplot as plt
 from fpdf import FPDF
 
-# ATTRACTIVE PNG IMAGE ICONS (change to your own for projects)
-DNA_ICON = "https://static.thenounproject.com/png/1201536-200.png"  # PNG double helix
-CIRCULAR_ICON = "https://cdn.pixabay.com/photo/2013/07/12/13/53/dna-147571_1280.png"  # PNG
-PLASMID_ICON = "https://cdn-icons-png.flaticon.com/512/6167/6167011.png"  # PNG circular DNA
+# --- PNG IMAGE ICONS FOR RELIABILITY ---
+DNA_ICON = "https://static.thenounproject.com/png/1201536-200.png"
+CIRCULAR_ICON = "https://cdn.pixabay.com/photo/2013/07/12/13/53/dna-147571_1280.png"
+PLASMID_ICON = "https://cdn-icons-png.flaticon.com/512/6167/6167011.png"
 
-# MODERN, COLORFUL, STYLISH BACKGROUND AND WIDGETS
+# --- MODERN CSS BACKGROUND & CARDS ---
 st.markdown("""
     <style>
     .stApp {
-        background: linear-gradient(135deg, #22223b 0%, #4a4e69 40%, #9f86c0 100%) !important;
+        background: linear-gradient(135deg, #141e30 0%, #243b55 100%) !important;
         min-height: 100vh;
     }
     .main > div {
-        background: rgba(245,247,250,0.82) !important;
+        background: rgba(245,247,250,0.89) !important;
         border-radius: 20px !important;
         margin-top: 18px !important;
-        padding: 12px 20px 12px 20px !important;
-        box-shadow: 0 12px 40px 0 rgba(50,50,100,0.13) !important;
+        padding: 14px 22px 8px 22px !important;
+        box-shadow: 0 12px 36px 0 rgba(35,60,130,0.13) !important;
     }
     .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4 {
-        color: #393e62 !important;
+        color: #193466 !important;
     }
     .stButton>button, .stDownloadButton>button {
-        background: linear-gradient(90deg, #7267cb 15%, #5f72bd 75%);
-        color: #f7fdff;
-        border-radius: 6px;
-        border: none;
+        background: linear-gradient(90deg, #2b5876 10%, #4e4376 90%)!important;
+        color: #f7fdff !important;
+        border-radius: 8px;
         font-weight: 700;
-        font-size: 1.08em;
-        box-shadow: 0px 2px 18px  #aab4ed33;
-        transition: 0.18s;
+        font-size: 1.09em;
+        border: none;
     }
     .stButton>button:hover, .stDownloadButton>button:hover {
-        background: linear-gradient(90deg, #9f86c0, #5f72bd);
+        background: linear-gradient(90deg, #4e4376, #2b5876)!important;
         color: #fff;
         border: none;
         transform: translateY(-2px) scale(1.03);
     }
-    /* Sidebar style */
-    .stSidebar {
-        background: #393e62 !important;
-        color: #fff !important;
-    }
-    /* Carded sidebar area (fallback for new Streamlit) */
-    section[data-testid="stSidebar"] div[class^="css-"] {
-        background: linear-gradient(160deg, #3d326b 0%, #7267cb 100%)!important;
-        color: #fff !important;
-        border-radius: 20px !important;
-        margin: 8px;
-        padding: 16px 8px;
-    }
-    /* Tab selector styling */
     .stTabs [data-baseweb="tab"] {
-        color: #444c6e !important;
+        color: #404d7a !important;
         font-weight: 500;
-        font-size:1.11rem;
-        background: #f4f5fa99;
+        background: #f1f1fc99;
         border-radius: 10px 10px 0 0;
-        margin-right: 4px;
+        margin-right: 6px;
         margin-bottom: 0px;
         padding: 7px 20px 6px 20px !important;
     }
     .stTabs [aria-selected="true"] {
-        background: linear-gradient(90deg, #7267cbcc 0%, #c7b1e8cc 80%)!important;
-        color: #1d1a29 !important;
+        background: linear-gradient(90deg, #a8edea99 0%, #fed6e399 80%)!important;
+        color: #14203f !important;
         border-bottom: 4px solid #5271ff;
         font-weight: 700;
-        box-shadow: 0 8px 22px -16px #888aad99;
+        box-shadow: 0 8px 22px -16px #888aad55;
     }
+    /* Card images */
     img, .element-container img {
-        background-color: #f6f5fd;
+        background-color: #f0f5ff;
         border-radius: 14px;
         border: 2px solid #9f86c032;
-        box-shadow: 0 2px 8px 1px #6c708fff;
+        box-shadow: 0 2px 8px 1px #2a366f0c;
         padding: 7px;
-        margin-bottom: 4px;
+        margin-bottom: 8px;
         max-width: 100%;
         display: block;
         margin-left: auto;
         margin-right: auto;
+    }
+    /* Sidebar nicer fallback coloring */
+    section[data-testid="stSidebar"] div[class^="css-"] {
+        background: linear-gradient(180deg, #233047 0%, #383b65 100%)!important;
+        color: #fff !important;
+        border-radius: 22px !important;
+        margin: 8px;
+        padding: 8px 10px 16px 10px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -171,7 +163,7 @@ def generate_pdf_report(results, seq, repeats, orfs, annotations):
 
 # -- SIDEBAR WITH LOGO AND ABOUT --
 with st.sidebar:
-    st.image(DNA_ICON, width=180, use_column_width=True)
+    st.image(DNA_ICON, width=180, use_column_width=False)
     st.markdown("### 🧬 Circular DNA Scanner")
     st.info(
         "Detects circularity, repeats, ORFs, and elements in DNA sequences. "
@@ -180,7 +172,7 @@ with st.sidebar:
     st.markdown("---")
     st.write("**Author:** bhagya220")
     st.write("Version: 1.0")
-    st.image(PLASMID_ICON, width=110, caption="Plasmid example", use_column_width=False)
+    st.image(PLASMID_ICON, width=100, caption="Plasmid example", use_column_width=False)
 
 # -- MAIN PAGE TITLE WITH IMAGE --
 st.set_page_config(page_title="Circular DNA Scanner", layout="wide")
@@ -346,7 +338,7 @@ with tabs[5]:
     st.header("PDF Report")
     results = st.session_state.get('results', [])
     if results:
-        result = results[0]  # Only first result for demo; can loop for batch
+        result = results[0]
         pdf_bytes = generate_pdf_report(result, result["Sequence"], result["Repeats"], result["ORFs"], result["Annotations"])
         st.download_button("Download PDF Report", pdf_bytes, file_name="CircularDNA_Report.pdf")
         st.image("https://cdn-icons-png.flaticon.com/512/337/337946.png", width=48, caption="Download your PDF!", use_column_width=False)
