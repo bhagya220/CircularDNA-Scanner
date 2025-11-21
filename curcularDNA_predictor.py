@@ -23,7 +23,6 @@ def detect_repeats(seq, min_repeat_size=10):
     return repeats
 
 def find_ORFs(seq, min_orf=100):
-    # Clean up sequence: keep only A, T, G, C
     seq_clean = re.sub(r'[^ATGC]', '', seq.upper())
     seq_obj = Seq.Seq(seq_clean)
     orfs = []
@@ -35,7 +34,7 @@ def find_ORFs(seq, min_orf=100):
             try:
                 trans = str(nuc_trimmed.translate(to_stop=False))
             except Exception:
-                continue  # Skip frames with translation errors
+                continue
             for m in re.finditer('M.*?\*', trans):
                 orf_len = (m.end() - m.start())*3
                 if orf_len >= min_orf:
@@ -58,17 +57,13 @@ def plot_circular_map(seq, repeats, orfs, annotations):
     length = len(seq)
     ax.set_xticks([])
     ax.set_yticks([])
-    # Draw backbone
     ax.plot([0, 2 * 3.1416], [1, 1], color='black', linewidth=6)
-    # Draw repeats
     for r in repeats:
         theta = [2 * 3.1416 * r['start'] / length, 2 * 3.1416 * r['end'] / length]
         ax.plot(theta, [1.2, 1.2], color='red', linewidth=4)
-    # Draw ORFs
     for o in orfs:
         theta = [2 * 3.1416 * o['start'] / length, 2 * 3.1416 * o['end'] / length]
         ax.plot(theta, [0.8, 0.8], color='green', linewidth=4)
-    # Annotate elements
     for a in annotations:
         theta = 2 * 3.1416 * a['pos'] / length
         ax.plot([theta], [1], marker='o', color='blue')
@@ -88,10 +83,21 @@ def generate_pdf_report(results, seq, repeats, orfs, annotations):
     pdf.cell(200, 10, txt=f"ORFs detected: {len(orfs)}", ln=2)
     pdf.cell(200, 10, txt=f"Annotations: {', '.join([a['element'] for a in annotations])}", ln=2)
     pdf.multi_cell(0, 10, txt=f"First 300 bases: {seq[:300]}...")
-    # For illustration, no images embedded; to embed, save and use image
     return pdf.output(dest='S').encode('latin-1')
 
 st.set_page_config(page_title="Circular DNA Scanner", layout="wide")
+
+# -------------------- NEW BACKGROUND COLOR --------------------
+st.markdown("""
+    <style>
+    .stApp {
+        background: linear-gradient(135deg, #1d1f33, #3b3e5c, #5e5fa4) !important;
+        background-attachment: fixed;
+    }
+    </style>
+""", unsafe_allow_html=True)
+# --------------------------------------------------------------
+
 st.title("Circular DNA Scanner")
 
 tabs = st.tabs([
@@ -102,6 +108,7 @@ tabs = st.tabs([
     "Documentation",
     "PDF Report"
 ])
+
 min_overlap_default = 100
 identity_threshold_default = 0.9
 
@@ -128,7 +135,7 @@ with tabs[1]:
     if upload_option == "Upload FASTA file":
         uploaded_file = st.file_uploader("Choose a FASTA file", type=["fa", "fasta", "txt"])
         if st.button("Download example FASTA"):
-            example_fasta = ">Example1\nATGCGTACGTTAGCTAGCATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGAT"
+            example_fasta = ">Example1\nATGCGTACGTTAGCTAGCATCGAT..."
             st.download_button("Click to download example FASTA", example_fasta, file_name="example.fasta")
         if uploaded_file is not None:
             fasta_io = io.StringIO(uploaded_file.getvalue().decode("utf-8"))
@@ -231,11 +238,12 @@ with tabs[5]:
     st.header("PDF Report")
     results = st.session_state.get('results', [])
     if results:
-        result = results[0]  # Only first result for demo; can loop for batch
+        result = results[0]
         pdf_bytes = generate_pdf_report(result, result["Sequence"], result["Repeats"], result["ORFs"], result["Annotations"])
         st.download_button("Download PDF Report", pdf_bytes, file_name="CircularDNA_Report.pdf")
     else:
         st.info("No results to export. Please process sequences in the Upload tab.")
+
 
 
 
