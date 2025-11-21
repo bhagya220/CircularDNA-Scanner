@@ -9,36 +9,14 @@ from fpdf import FPDF
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(page_title="Circular DNA Scanner", layout="wide", page_icon="🧬")
 
-# ---------------- IMAGE PATHS (use uploaded local file so images always show) ----------------
-# Developer note: using the uploaded file path from your environment.
-LOCAL_IMG = "/mnt/data/6233a34b-2d4d-47a5-8dbd-27c90e43f2bf.png"
+# ---------------- LOCAL IMAGE PATHS ----------------
+# Using the uploaded local image so icons show reliably in the app.
+IMG_PATH = "/mnt/data/6780a7b5-8e23-41a8-b773-9a29f05df298.png"
 
-# For now we'll reuse the uploaded image for all icons so they display reliably.
-# You can replace any of these with other local files later (e.g. "./images/plasmid.png")
-DNA_ICON = LOCAL_IMG
-CIRCULAR_ICON = LOCAL_IMG
-PLASMID_ICON = LOCAL_IMG
-PDF_ICON = LOCAL_IMG
-
-# ---------------- IMAGE DISPLAY HELPER ----------------
-def display_image(path_or_url, width=180, caption=None):
-    """
-    Display a local file reliably using st.image, otherwise render a safe <img> tag for remote URLs.
-    Keeps visuals consistent and accessible (caption used as alt/caption).
-    """
-    if isinstance(path_or_url, str) and (path_or_url.startswith("/mnt/") or path_or_url.startswith("./") or path_or_url.startswith("file://")):
-        # Local file — use st.image (most reliable and served by the app)
-        try:
-            st.image(path_or_url, width=width, caption=caption, use_column_width=False)
-            return
-        except Exception:
-            # Fallback to HTML rendering if st.image fails
-            pass
-
-    # Remote URL fallback: render HTML <img>
-    style = f"max-width:{width}px; width:100%; height:auto; border-radius:12px; border:2px solid rgba(159,134,192,0.18); box-shadow:0 2px 8px rgba(0,0,0,0.08); padding:6px; background:#fff; display:block; margin-left:auto; margin-right:auto;"
-    caption_html = f"<div style='text-align:center; font-size:0.9em; color:#222; margin-top:6px'>{caption}</div>" if caption else ""
-    st.markdown(f"<div style='text-align:center'><img src=\"{path_or_url}\" style=\"{style}\" alt=\"{caption or 'image'}\"/></div>{caption_html}", unsafe_allow_html=True)
+DNA_ICON = IMG_PATH
+CIRCULAR_ICON = IMG_PATH
+PLASMID_ICON = IMG_PATH
+PDF_ICON = IMG_PATH
 
 # ---------------- STYLES (background + cards) ----------------
 st.markdown("""
@@ -157,12 +135,12 @@ def generate_pdf_report(results, seq, repeats, orfs, annotations):
     pdf.cell(200, 10, txt=f"ORFs detected: {len(orfs)}", ln=2)
     pdf.cell(200, 10, txt=f"Annotations: {', '.join([a['element'] for a in annotations])}", ln=2)
     pdf.multi_cell(0, 10, txt=f"First 300 bases: {seq[:300]}...")
-    # Note: images not embedded in PDF in this example to keep code straightforward.
+    # Note: images not embedded in PDF in this simple example.
     return pdf.output(dest='S').encode('latin-1')
 
-# ---------------- SIDEBAR WITH ICONS & INFO ----------------
+# ---------------- SIDEBAR WITH ICONS & INFO (use st.image for local files) ----------------
 with st.sidebar:
-    display_image(DNA_ICON, width=220, caption="DNA double helix (local icon)")
+    st.image(DNA_ICON, width=220, caption="DNA double helix (local icon)")
     st.markdown("### 🧬 Circular DNA Scanner")
     st.info(
         "Detects circularity, repeats, ORFs, and elements in DNA sequences. Visualize and export results."
@@ -170,14 +148,14 @@ with st.sidebar:
     st.markdown("---")
     st.write("**Author:** bhagya220")
     st.write("Version: 1.0")
-    display_image(PLASMID_ICON, width=140, caption="Plasmid example (local icon)")
+    st.image(PLASMID_ICON, width=140, caption="Plasmid example (local icon)")
 
 # ---------------- MAIN PAGE TITLE WITH ICON ----------------
 col1, col2 = st.columns([7, 1])
 with col1:
     st.title("🧬 Circular DNA Scanner")
 with col2:
-    display_image(CIRCULAR_ICON, width=100, caption="Circular DNA icon")
+    st.image(CIRCULAR_ICON, width=100, caption="Circular DNA icon")
 
 # ---------------- TABS ----------------
 tabs = st.tabs([
@@ -207,13 +185,13 @@ with tabs[0]:
         - **PDF Report:** Export results as PDF.
         """)
     with c2:
-        # A small column gallery of accessible icons
-        display_image(DNA_ICON, width=140, caption="DNA double helix")
-        display_image(PLASMID_ICON, width=120, caption="Plasmid / circular DNA")
+        # A small column gallery of accessible icons (use local image)
+        st.image(DNA_ICON, width=140, caption="DNA double helix")
+        st.image(PLASMID_ICON, width=120, caption="Plasmid / circular DNA")
 
 with tabs[1]:
     st.header("Upload or Paste Sequence")
-    display_image(CIRCULAR_ICON, width=90, caption="Use this icon as visual hint")
+    st.image(CIRCULAR_ICON, width=90, caption="Use this icon as visual hint")
     min_overlap = st.slider("Minimum Overlap (bases)", min_value=20, max_value=500, value=min_overlap_default, step=10)
     identity_threshold = st.slider("Identity Threshold", min_value=0.5, max_value=1.0, value=identity_threshold_default, step=0.01)
     upload_option = st.radio("Choose input method:", ["Upload FASTA file", "Paste Sequence"])
@@ -283,13 +261,13 @@ with tabs[2]:
                 st.write(f"**Annotations:** {', '.join([a['element'] for a in result['Annotations']]) or 'None'}")
                 st.code(result["Sequence"][:300] + "...", language="text")
             with c2:
-                display_image(PLASMID_ICON, width=120, caption="Plasmid preview")
+                st.image(PLASMID_ICON, width=120, caption="Plasmid preview")
     else:
         st.info("No results to show. Please process sequences in the Upload tab.")
 
 with tabs[3]:
     st.header("Visualization")
-    display_image(PLASMID_ICON, width=90, caption="Circular map preview")
+    st.image(PLASMID_ICON, width=90, caption="Circular map preview")
     results = st.session_state.get('results', [])
     if results:
         for result in results:
@@ -301,7 +279,7 @@ with tabs[3]:
 
 with tabs[4]:
     st.header("Documentation")
-    display_image(DNA_ICON, width=100, caption="DNA icon (local)")
+    st.image(DNA_ICON, width=100, caption="DNA icon (local)")
     st.markdown("""
     ## About Circular DNA Scanner
     This tool predicts whether DNA sequences are circular by comparing the first and last N bases for similarity.
@@ -329,7 +307,7 @@ with tabs[4]:
 
 with tabs[5]:
     st.header("PDF Report")
-    display_image(PDF_ICON, width=48, caption="PDF icon")
+    st.image(PDF_ICON, width=48, caption="PDF icon (local)")
     results = st.session_state.get('results', [])
     if results:
         result = results[0]  # Only first result for demo; can loop for batch
@@ -337,6 +315,7 @@ with tabs[5]:
         st.download_button("Download PDF Report", pdf_bytes, file_name="CircularDNA_Report.pdf")
     else:
         st.info("No results to export. Please process sequences in the Upload tab.")
+
 
 
 
