@@ -6,10 +6,73 @@ import re
 import matplotlib.pyplot as plt
 from fpdf import FPDF
 
-# --- IMAGE URLs (replace with your own for full control) ---
+# --- IMAGE URLs (replace with your own PNGs/SVGs for full control) ---
 DNA_ICON = "https://upload.wikimedia.org/wikipedia/commons/8/8c/DNA_double_helix_horizontal.png"
 CIRCULAR_ICON = "https://cdn.pixabay.com/photo/2013/07/12/13/53/dna-147571_1280.png"
 PLASMID_ICON = "https://raw.githubusercontent.com/hshar/tutorials-2020-examples/master/dna-circular.svg"
+
+# --- Inject Custom CSS for Improved Background and UI ---
+st.markdown("""
+    <style>
+    body, .stApp {
+        background: linear-gradient(135deg, #e0e7ff 0%, #f6d365 100%) !important;
+    }
+    .main > div {
+        background-color: rgba(255,255,255,0.92) !important;
+        border-radius: 14px !important;
+        margin-top: 10px !important;
+        padding: 0px 10px 0px 10px !important;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+    }
+    .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4 {
+        color: #1d3557 !important;
+    }
+    .stButton>button {
+        background-color: #5271ff;
+        color: white;
+        border-radius: 6px;
+        padding: 0.5em 1.3em;
+        font-size: 1.1em;
+        font-weight: 700;
+        box-shadow: 0px 2px 10px  #aab4ed33;
+        border: none;
+    }
+    .stButton>button:hover {
+        background-color: #2345b3;
+        color: #e0e7ff;
+    }
+    .stDownloadButton>button {
+        background: #3ec6e0 !important;
+        color: white;
+        border-radius: 6px;
+        font-weight: bold;
+        border: none;
+    }
+    .sidebar-content, .css-1d391kg {
+        background-color: #29487d33 !important;
+        border-radius: 16px !important;
+        padding: 14px 6px 8px 6px !important;
+    }
+    img, .element-container img {
+        background-color: #f0f5ff;
+        border-radius: 12px;
+        border: 1px solid #bfd8ff44;
+        padding: 5px;
+        margin-bottom: 4px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        color: #355c7d;
+        font-weight: 600;
+        font-size: 1.10rem;
+        background: rgba(255,255,255,0.56);
+        border-radius: 6px 6px 0px 0px;
+    }
+    .stTabs [aria-selected="true"] {
+        background: #bbbbee;
+        color: #1d3557 !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 def check_circularity(seq, min_overlap=100, identity_threshold=0.9):
     start = seq[:min_overlap]
@@ -92,7 +155,7 @@ def generate_pdf_report(results, seq, repeats, orfs, annotations):
 
 # -- SIDEBAR WITH LOGO AND ABOUT --
 with st.sidebar:
-    st.image(DNA_ICON, width=220)
+    st.image(DNA_ICON, width=220, use_column_width=False)
     st.markdown("### 🧬 Circular DNA Scanner")
     st.info(
         "Detects circularity, repeats, ORFs, and elements in DNA sequences. "
@@ -101,7 +164,7 @@ with st.sidebar:
     st.markdown("---")
     st.write("**Author:** bhagya220")
     st.write("Version: 1.0")
-    st.image(PLASMID_ICON, width=130, caption="Plasmid example (SVG)", output_format='auto')
+    st.image(PLASMID_ICON, width=130, caption="Plasmid example (SVG)", output_format='auto', use_column_width=False)
 
 # -- MAIN PAGE TITLE WITH IMAGE --
 st.set_page_config(page_title="Circular DNA Scanner", layout="wide")
@@ -109,7 +172,7 @@ col1, col2 = st.columns([7, 1])
 with col1:
     st.title("🧬 Circular DNA Scanner")
 with col2:
-    st.image(CIRCULAR_ICON, width=90)
+    st.image(CIRCULAR_ICON, width=90, use_column_width=False)
 
 tabs = st.tabs([
     "Home",
@@ -138,12 +201,12 @@ with tabs[0]:
         - **PDF Report:** Export results as PDF.
         """)
     with c2:
-        st.image(DNA_ICON, width=180, caption="DNA double helix")
-        st.image(PLASMID_ICON, width=100, caption="Circular DNA")
+        st.image(DNA_ICON, width=180, caption="DNA double helix", use_column_width=False)
+        st.image(PLASMID_ICON, width=100, caption="Circular DNA", use_column_width=False)
 
 with tabs[1]:
     st.header("Upload or Paste Sequence")
-    st.image(CIRCULAR_ICON, width=65)
+    st.image(CIRCULAR_ICON, width=65, use_column_width=False)
     min_overlap = st.slider("Minimum Overlap (bases)", min_value=20, max_value=500, value=min_overlap_default, step=10)
     identity_threshold = st.slider("Identity Threshold", min_value=0.5, max_value=1.0, value=identity_threshold_default, step=0.01)
     upload_option = st.radio("Choose input method:", ["Upload FASTA file", "Paste Sequence"])
@@ -153,7 +216,8 @@ with tabs[1]:
         if st.button("Download example FASTA"):
             example_fasta = (
                 ">Example1\nATGCGTACGTTAGCTAGCATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGA" +
-                "TCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGAT[...]"
+                "TCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGA" +
+                "TCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGA"
             )
             st.download_button("Click to download example FASTA", example_fasta, file_name="example.fasta")
         if uploaded_file is not None:
@@ -218,13 +282,13 @@ with tabs[2]:
                 st.write(f"**Annotations:** {', '.join([a['element'] for a in result['Annotations']]) or 'None'}")
                 st.code(result["Sequence"][:300] + "...", language="text")
             with c2:
-                st.image(PLASMID_ICON, width=90)
+                st.image(PLASMID_ICON, width=90, use_column_width=False)
     else:
         st.info("No results to show. Please process sequences in the Upload tab.")
 
 with tabs[3]:
     st.header("Visualization")
-    st.image(PLASMID_ICON, width=70)
+    st.image(PLASMID_ICON, width=70, use_column_width=False)
     results = st.session_state.get('results', [])
     if results:
         for result in results:
@@ -236,7 +300,7 @@ with tabs[3]:
 
 with tabs[4]:
     st.header("Documentation")
-    st.image(DNA_ICON, width=90)
+    st.image(DNA_ICON, width=90, use_column_width=False)
     st.markdown("""
     ## About Circular DNA Scanner
     This tool predicts whether DNA sequences are circular by comparing the first and last N bases for similarity.
@@ -269,6 +333,6 @@ with tabs[5]:
         result = results[0]  # Only first result for demo; can loop for batch
         pdf_bytes = generate_pdf_report(result, result["Sequence"], result["Repeats"], result["ORFs"], result["Annotations"])
         st.download_button("Download PDF Report", pdf_bytes, file_name="CircularDNA_Report.pdf")
-        st.image("https://cdn-icons-png.flaticon.com/512/337/337946.png", width=48, caption="Download your PDF!")
+        st.image("https://cdn-icons-png.flaticon.com/512/337/337946.png", width=48, caption="Download your PDF!", use_column_width=False)
     else:
         st.info("No results to export. Please process sequences in the Upload tab.")
