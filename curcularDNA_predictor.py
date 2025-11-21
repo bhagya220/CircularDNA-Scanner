@@ -6,21 +6,10 @@ import re
 import matplotlib.pyplot as plt
 from fpdf import FPDF
 
-# --- PAGE CONFIG (must come before layout calls) ---
-st.set_page_config(page_title="Circular DNA Scanner", layout="wide", page_icon="🧬")
-
 # ATTRACTIVE PNG IMAGE ICONS (change to your own for projects)
-DNA_ICON = "https://upload.wikimedia.org/wikipedia/commons/8/8b/DNA_double_helix.svg"
-CIRCULAR_ICON = "https://upload.wikimedia.org/wikipedia/commons/3/30/Plasmid_map_example.svg"
-PLASMID_ICON = "https://upload.wikimedia.org/wikipedia/commons/3/3f/Plasmid.png"
-PDF_ICON = "https://cdn-icons-png.flaticon.com/512/337/337946.png"
-
-# Helper to reliably render external images using HTML so CSS can style them
-def display_image(url, width=180, caption=None, center=True):
-    style = f"max-width:{width}px; width:100%; height:auto; border-radius:12px; border:2px solid rgba(159,134,192,0.2); box-shadow:0 2px 8px rgba(108,112,143,0.6); padding:6px; background:#f6f5fd; display:block; margin-left:auto; margin-right:auto;"
-    caption_html = f"<div style='text-align:center; font-size:0.9em; color:#fff; margin-top:6px'>{caption}</div>" if caption else ""
-    align = "margin-left:auto; margin-right:auto;" if center else ""
-    st.markdown(f"<div style='text-align:center'><img src=\"{url}\" style=\"{style}\"/></div>{caption_html}", unsafe_allow_html=True)
+DNA_ICON = "https://static.thenounproject.com/png/1201536-200.png"  # PNG double helix
+CIRCULAR_ICON = "https://cdn.pixabay.com/photo/2013/07/12/13/53/dna-147571_1280.png"  # PNG
+PLASMID_ICON = "https://cdn-icons-png.flaticon.com/512/6167/6167011.png"  # PNG circular DNA
 
 # MODERN, COLORFUL, STYLISH BACKGROUND AND WIDGETS
 st.markdown("""
@@ -30,7 +19,7 @@ st.markdown("""
         min-height: 100vh;
     }
     .main > div {
-        background: rgba(245,247,250,0.92) !important;
+        background: rgba(245,247,250,0.82) !important;
         border-radius: 20px !important;
         margin-top: 18px !important;
         padding: 12px 20px 12px 20px !important;
@@ -60,6 +49,7 @@ st.markdown("""
         background: #393e62 !important;
         color: #fff !important;
     }
+    /* Carded sidebar area (fallback for new Streamlit) */
     section[data-testid="stSidebar"] div[class^="css-"] {
         background: linear-gradient(160deg, #3d326b 0%, #7267cb 100%)!important;
         color: #fff !important;
@@ -67,6 +57,7 @@ st.markdown("""
         margin: 8px;
         padding: 16px 8px;
     }
+    /* Tab selector styling */
     .stTabs [data-baseweb="tab"] {
         color: #444c6e !important;
         font-weight: 500;
@@ -84,17 +75,26 @@ st.markdown("""
         font-weight: 700;
         box-shadow: 0 8px 22px -16px #888aad99;
     }
+    img, .element-container img {
+        background-color: #f6f5fd;
+        border-radius: 14px;
+        border: 2px solid #9f86c032;
+        box-shadow: 0 2px 8px 1px #6c708fff;
+        padding: 7px;
+        margin-bottom: 4px;
+        max-width: 100%;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
     </style>
 """, unsafe_allow_html=True)
-
-# FUNCTIONS (unchanged logic) -------------------------------------------------
 
 def check_circularity(seq, min_overlap=100, identity_threshold=0.9):
     start = seq[:min_overlap]
     end = seq[-min_overlap:]
     ratio = SequenceMatcher(None, start, end).ratio()
     return ratio >= identity_threshold, ratio
-
 
 def detect_repeats(seq, min_repeat_size=10):
     seq = seq.upper()
@@ -105,7 +105,6 @@ def detect_repeats(seq, min_repeat_size=10):
             if seq.count(motif) > 1:
                 repeats.append({'motif': motif, 'start': i, 'end': i+size})
     return repeats
-
 
 def find_ORFs(seq, min_orf=100):
     seq_clean = re.sub(r'[^ATGC]', '', seq.upper())
@@ -128,7 +127,6 @@ def find_ORFs(seq, min_orf=100):
                     orfs.append({'strand': strand, 'start': start, 'end': end, 'length': orf_len})
     return orfs
 
-
 def annotate_elements(seq):
     seq = seq.upper()
     annotations = []
@@ -137,7 +135,6 @@ def annotate_elements(seq):
     if "AATAAA" in seq:
         annotations.append({'element': 'polyA signal', 'pos': seq.find('AATAAA')})
     return annotations
-
 
 def plot_circular_map(seq, repeats, orfs, annotations):
     fig, ax = plt.subplots(subplot_kw={'projection': 'polar'}, figsize=(6, 6))
@@ -158,7 +155,6 @@ def plot_circular_map(seq, repeats, orfs, annotations):
     ax.set_title('Circular Genome Map', va='bottom')
     return fig
 
-
 def generate_pdf_report(results, seq, repeats, orfs, annotations):
     pdf = FPDF()
     pdf.add_page()
@@ -175,7 +171,7 @@ def generate_pdf_report(results, seq, repeats, orfs, annotations):
 
 # -- SIDEBAR WITH LOGO AND ABOUT --
 with st.sidebar:
-    display_image(DNA_ICON, width=220, caption="DNA double helix")
+    st.image(DNA_ICON, width=180, use_column_width=True)
     st.markdown("### 🧬 Circular DNA Scanner")
     st.info(
         "Detects circularity, repeats, ORFs, and elements in DNA sequences. "
@@ -184,16 +180,16 @@ with st.sidebar:
     st.markdown("---")
     st.write("**Author:** bhagya220")
     st.write("Version: 1.0")
-    display_image(PLASMID_ICON, width=160, caption="Plasmid example")
+    st.image(PLASMID_ICON, width=110, caption="Plasmid example", use_column_width=False)
 
 # -- MAIN PAGE TITLE WITH IMAGE --
+st.set_page_config(page_title="Circular DNA Scanner", layout="wide")
 col1, col2 = st.columns([7, 1])
 with col1:
     st.title("🧬 Circular DNA Scanner")
 with col2:
-    display_image(CIRCULAR_ICON, width=120)
+    st.image(CIRCULAR_ICON, width=90, use_column_width=False)
 
-# TABS
 tabs = st.tabs([
     "Home",
     "Upload",
@@ -221,12 +217,12 @@ with tabs[0]:
         - **PDF Report:** Export results as PDF.
         """)
     with c2:
-        display_image(DNA_ICON, width=160, caption="DNA double helix")
-        display_image(PLASMID_ICON, width=120, caption="Circular DNA")
+        st.image(DNA_ICON, width=150, caption="DNA double helix", use_column_width=True)
+        st.image(PLASMID_ICON, width=90, caption="Circular DNA", use_column_width=True)
 
 with tabs[1]:
     st.header("Upload or Paste Sequence")
-    display_image(CIRCULAR_ICON, width=90)
+    st.image(CIRCULAR_ICON, width=70, use_column_width=False)
     min_overlap = st.slider("Minimum Overlap (bases)", min_value=20, max_value=500, value=min_overlap_default, step=10)
     identity_threshold = st.slider("Identity Threshold", min_value=0.5, max_value=1.0, value=identity_threshold_default, step=0.01)
     upload_option = st.radio("Choose input method:", ["Upload FASTA file", "Paste Sequence"])
@@ -237,7 +233,7 @@ with tabs[1]:
             example_fasta = (
                 ">Example1\nATGCGTACGTTAGCTAGCATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGA" +
                 "TCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGA" +
-                "TCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGA"
+                "TCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGA"
             )
             st.download_button("Click to download example FASTA", example_fasta, file_name="example.fasta")
         if uploaded_file is not None:
@@ -302,13 +298,13 @@ with tabs[2]:
                 st.write(f"**Annotations:** {', '.join([a['element'] for a in result['Annotations']]) or 'None'}")
                 st.code(result["Sequence"][:300] + "...", language="text")
             with c2:
-                display_image(PLASMID_ICON, width=120)
+                st.image(PLASMID_ICON, width=80, use_column_width=True)
     else:
         st.info("No results to show. Please process sequences in the Upload tab.")
 
 with tabs[3]:
     st.header("Visualization")
-    display_image(PLASMID_ICON, width=90)
+    st.image(PLASMID_ICON, width=70, use_column_width=False)
     results = st.session_state.get('results', [])
     if results:
         for result in results:
@@ -320,7 +316,7 @@ with tabs[3]:
 
 with tabs[4]:
     st.header("Documentation")
-    display_image(DNA_ICON, width=100)
+    st.image(DNA_ICON, width=90, use_column_width=False)
     st.markdown("""
     ## About Circular DNA Scanner
     This tool predicts whether DNA sequences are circular by comparing the first and last N bases for similarity.
@@ -353,7 +349,7 @@ with tabs[5]:
         result = results[0]  # Only first result for demo; can loop for batch
         pdf_bytes = generate_pdf_report(result, result["Sequence"], result["Repeats"], result["ORFs"], result["Annotations"])
         st.download_button("Download PDF Report", pdf_bytes, file_name="CircularDNA_Report.pdf")
-        display_image(PDF_ICON, width=48, caption="Download your PDF!")
+        st.image("https://cdn-icons-png.flaticon.com/512/337/337946.png", width=48, caption="Download your PDF!", use_column_width=False)
     else:
         st.info("No results to export. Please process sequences in the Upload tab.")
 
