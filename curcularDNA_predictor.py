@@ -6,70 +6,86 @@ import re
 import matplotlib.pyplot as plt
 from fpdf import FPDF
 
-# --- IMAGE URLs (replace with your own PNGs/SVGs for full control) ---
-DNA_ICON = "https://upload.wikimedia.org/wikipedia/commons/8/8c/DNA_double_helix_horizontal.png"
-CIRCULAR_ICON = "https://cdn.pixabay.com/photo/2013/07/12/13/53/dna-147571_1280.png"
-PLASMID_ICON = "https://raw.githubusercontent.com/hshar/tutorials-2020-examples/master/dna-circular.svg"
+# ATTRACTIVE PNG IMAGE ICONS (change to your own for projects)
+DNA_ICON = "https://static.thenounproject.com/png/1201536-200.png"  # PNG double helix
+CIRCULAR_ICON = "https://cdn.pixabay.com/photo/2013/07/12/13/53/dna-147571_1280.png"  # PNG
+PLASMID_ICON = "https://cdn-icons-png.flaticon.com/512/6167/6167011.png"  # PNG circular DNA
 
-# --- Inject Custom CSS for Improved Background and UI ---
+# MODERN, COLORFUL, STYLISH BACKGROUND AND WIDGETS
 st.markdown("""
     <style>
-    body, .stApp {
-        background: linear-gradient(135deg, #e0e7ff 0%, #f6d365 100%) !important;
+    .stApp {
+        background: linear-gradient(135deg, #22223b 0%, #4a4e69 40%, #9f86c0 100%) !important;
+        min-height: 100vh;
     }
     .main > div {
-        background-color: rgba(255,255,255,0.92) !important;
-        border-radius: 14px !important;
-        margin-top: 10px !important;
-        padding: 0px 10px 0px 10px !important;
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+        background: rgba(245,247,250,0.82) !important;
+        border-radius: 20px !important;
+        margin-top: 18px !important;
+        padding: 12px 20px 12px 20px !important;
+        box-shadow: 0 12px 40px 0 rgba(50,50,100,0.13) !important;
     }
     .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4 {
-        color: #1d3557 !important;
+        color: #393e62 !important;
     }
-    .stButton>button {
-        background-color: #5271ff;
-        color: white;
+    .stButton>button, .stDownloadButton>button {
+        background: linear-gradient(90deg, #7267cb 15%, #5f72bd 75%);
+        color: #f7fdff;
         border-radius: 6px;
-        padding: 0.5em 1.3em;
-        font-size: 1.1em;
+        border: none;
         font-weight: 700;
-        box-shadow: 0px 2px 10px  #aab4ed33;
+        font-size: 1.08em;
+        box-shadow: 0px 2px 18px  #aab4ed33;
+        transition: 0.18s;
+    }
+    .stButton>button:hover, .stDownloadButton>button:hover {
+        background: linear-gradient(90deg, #9f86c0, #5f72bd);
+        color: #fff;
         border: none;
+        transform: translateY(-2px) scale(1.03);
     }
-    .stButton>button:hover {
-        background-color: #2345b3;
-        color: #e0e7ff;
+    /* Sidebar style */
+    .stSidebar {
+        background: #393e62 !important;
+        color: #fff !important;
     }
-    .stDownloadButton>button {
-        background: #3ec6e0 !important;
-        color: white;
-        border-radius: 6px;
-        font-weight: bold;
-        border: none;
+    /* Carded sidebar area (fallback for new Streamlit) */
+    section[data-testid="stSidebar"] div[class^="css-"] {
+        background: linear-gradient(160deg, #3d326b 0%, #7267cb 100%)!important;
+        color: #fff !important;
+        border-radius: 20px !important;
+        margin: 8px;
+        padding: 16px 8px;
     }
-    .sidebar-content, .css-1d391kg {
-        background-color: #29487d33 !important;
-        border-radius: 16px !important;
-        padding: 14px 6px 8px 6px !important;
-    }
-    img, .element-container img {
-        background-color: #f0f5ff;
-        border-radius: 12px;
-        border: 1px solid #bfd8ff44;
-        padding: 5px;
-        margin-bottom: 4px;
-    }
+    /* Tab selector styling */
     .stTabs [data-baseweb="tab"] {
-        color: #355c7d;
-        font-weight: 600;
-        font-size: 1.10rem;
-        background: rgba(255,255,255,0.56);
-        border-radius: 6px 6px 0px 0px;
+        color: #444c6e !important;
+        font-weight: 500;
+        font-size:1.11rem;
+        background: #f4f5fa99;
+        border-radius: 10px 10px 0 0;
+        margin-right: 4px;
+        margin-bottom: 0px;
+        padding: 7px 20px 6px 20px !important;
     }
     .stTabs [aria-selected="true"] {
-        background: #bbbbee;
-        color: #1d3557 !important;
+        background: linear-gradient(90deg, #7267cbcc 0%, #c7b1e8cc 80%)!important;
+        color: #1d1a29 !important;
+        border-bottom: 4px solid #5271ff;
+        font-weight: 700;
+        box-shadow: 0 8px 22px -16px #888aad99;
+    }
+    img, .element-container img {
+        background-color: #f6f5fd;
+        border-radius: 14px;
+        border: 2px solid #9f86c032;
+        box-shadow: 0 2px 8px 1px #6c708fff;
+        padding: 7px;
+        margin-bottom: 4px;
+        max-width: 100%;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -155,7 +171,7 @@ def generate_pdf_report(results, seq, repeats, orfs, annotations):
 
 # -- SIDEBAR WITH LOGO AND ABOUT --
 with st.sidebar:
-    st.image(DNA_ICON, width=220, use_column_width=False)
+    st.image(DNA_ICON, width=180, use_column_width=True)
     st.markdown("### 🧬 Circular DNA Scanner")
     st.info(
         "Detects circularity, repeats, ORFs, and elements in DNA sequences. "
@@ -164,7 +180,7 @@ with st.sidebar:
     st.markdown("---")
     st.write("**Author:** bhagya220")
     st.write("Version: 1.0")
-    st.image(PLASMID_ICON, width=130, caption="Plasmid example (SVG)", output_format='auto', use_column_width=False)
+    st.image(PLASMID_ICON, width=110, caption="Plasmid example", use_column_width=False)
 
 # -- MAIN PAGE TITLE WITH IMAGE --
 st.set_page_config(page_title="Circular DNA Scanner", layout="wide")
@@ -201,12 +217,12 @@ with tabs[0]:
         - **PDF Report:** Export results as PDF.
         """)
     with c2:
-        st.image(DNA_ICON, width=180, caption="DNA double helix", use_column_width=False)
-        st.image(PLASMID_ICON, width=100, caption="Circular DNA", use_column_width=False)
+        st.image(DNA_ICON, width=150, caption="DNA double helix", use_column_width=True)
+        st.image(PLASMID_ICON, width=90, caption="Circular DNA", use_column_width=True)
 
 with tabs[1]:
     st.header("Upload or Paste Sequence")
-    st.image(CIRCULAR_ICON, width=65, use_column_width=False)
+    st.image(CIRCULAR_ICON, width=70, use_column_width=False)
     min_overlap = st.slider("Minimum Overlap (bases)", min_value=20, max_value=500, value=min_overlap_default, step=10)
     identity_threshold = st.slider("Identity Threshold", min_value=0.5, max_value=1.0, value=identity_threshold_default, step=0.01)
     upload_option = st.radio("Choose input method:", ["Upload FASTA file", "Paste Sequence"])
@@ -282,7 +298,7 @@ with tabs[2]:
                 st.write(f"**Annotations:** {', '.join([a['element'] for a in result['Annotations']]) or 'None'}")
                 st.code(result["Sequence"][:300] + "...", language="text")
             with c2:
-                st.image(PLASMID_ICON, width=90, use_column_width=False)
+                st.image(PLASMID_ICON, width=80, use_column_width=True)
     else:
         st.info("No results to show. Please process sequences in the Upload tab.")
 
